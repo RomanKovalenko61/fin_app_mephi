@@ -77,17 +77,25 @@ public class Main {
 
     private static void workOperation(UUID uuid, BufferedReader reader) throws IOException {
         Wallet wallet = WALLETS_STORAGE.get(uuid);
-
+        Stat statistic = new Stat();
         while (true) {
-            printStateWallet(wallet);
+            gatheringStatWallet(statistic, wallet);
+            System.out.println("Ваш баланс: " + statistic.getBalance());
+            checkExpenseByCategory(statistic, wallet.getMapCategories());
             System.out.println("Введите команду для работы");
-            System.out.println("create category | create operation | list categories | list operations | exit");
+            System.out.println("""
+                        getfact | create category OR operation | update category OR operation | delete category OR operation 
+                        list categories OR operations | exit
+                    """);
             String params[] = reader.readLine().trim().toLowerCase().split(" ");
             if (params.length < 1 || params.length > 2) {
                 System.out.println("Неверная команда");
                 continue;
             }
             switch (params[0]) {
+                case "getfact":
+                    getFact(statistic, wallet.getMapCategories());
+                    break;
                 case "create":
                     String action = params[1];
                     if (action == null) {
@@ -100,6 +108,10 @@ public class Main {
                             String catName = reader.readLine();
                             System.out.println("Введите лимит для категории");
                             Integer catLimit = Integer.parseInt(reader.readLine());
+                            if (catLimit < 0) {
+                                System.err.println("Ошибка ВВедено отрицательное число");
+                                break;
+                            }
                             System.out.println("Выберите тип категории");
                             Type catType = chooseTypes(reader, Type.values());
                             if (Objects.isNull(catType)) {
@@ -115,6 +127,10 @@ public class Main {
                             System.out.println("create operation");
                             System.out.println("Введите сумму операции");
                             Integer sumOp = Integer.parseInt(reader.readLine());
+                            if (sumOp < 0) {
+                                System.err.println("Ошибка ВВедено отрицательное число");
+                                break;
+                            }
                             System.out.println("Выберите тип операции");
                             Type typeOp = chooseTypes(reader, Type.values());
                             if (Objects.isNull(typeOp)) {
@@ -123,14 +139,52 @@ public class Main {
                                 Operation newOp = new Operation(sumOp, typeOp);
                                 System.out.println("Выберите категорию для операции");
                                 Category catOp = chooseCategory(reader, wallet, typeOp);
-                                newOp.setCategory(catOp);
+                                if (Objects.nonNull(catOp)) {
+                                    newOp.setCategory(catOp);
+                                }
                                 wallet.addOperations(newOp);
                                 System.out.println("Операция добавлена");
                                 System.out.println("Info: " + newOp);
                             }
                             break;
                         default:
-                            System.err.println("wrong command");
+                            System.err.println("Неверная команда");
+                            break;
+                    }
+                    break;
+                case "update":
+                    String choice = params[1];
+                    if (choice == null) {
+                        System.err.println("Ошибка выполнения команды");
+                    }
+                    switch (choice) {
+                        case "category":
+                            System.out.println("update category");
+                            Category updateCat = chooseCategoryToChange(reader, wallet);
+                            System.out.println("Введите новый лимит");
+                            Integer newLimitCat = Integer.parseInt(reader.readLine());
+                            if (newLimitCat < 0) {
+                                System.err.println("Ошибка ВВедено отрицательное число");
+                                break;
+                            }
+                            updateCat.setLimit(newLimitCat);
+                            break;
+                        case "operation":
+                            System.out.println("update operation");
+                            break;
+                    }
+                    break;
+                case "delete":
+                    String who = params[1];
+                    if (who == null) {
+                        System.err.println("Ошибка выполнения команды");
+                    }
+                    switch (who) {
+                        case "category":
+                            System.out.println("delete category");
+                            break;
+                        case "operation":
+                            System.out.println("delete operation");
                             break;
                     }
                     break;
@@ -151,7 +205,7 @@ public class Main {
                             operations.forEach(System.out::println);
                             break;
                         default:
-                            System.err.println("wrong command");
+                            System.err.println("Неверная команда");
                             break;
                     }
                     break;
@@ -167,38 +221,60 @@ public class Main {
         }
     }
 
-    private static void printStateWallet(Wallet wallet) {
+    private static void getFact(Stat statistic, Map<UUID, Category> categories) {
+        System.out.println("-----------------------------------------------------------");
+        printMap(statistic.getSummaryIncome(), statistic.getGeneralIncome(), Type.INCOME, categories);
+        printMap(statistic.getSummaryExpense(), statistic.getGeneralExpense(), Type.EXPENSE, categories);
+        System.out.println("-----------------------------------------------------------");
+    }
+
+    private static void checkExpenseByCategory(Stat statistic, Map<UUID, Category> categories) {
+        Map<UUID, Integer> expense = statistic.getSummaryExpense();
+        for (Map.Entry<UUID, Integer> entry : expense.entrySet()) {
+            if (entry.getKey() != null) {
+                boolean check = categories.get(entry.getKey()).getLimit() - entry.getValue() < 0;
+                if (check) {
+                    System.err.println("Превышен лимит по расходов по категории " + categories.get(entry.getKey()).getName());
+                    System.err.println("Лимит: " + categories.get(entry.getKey()).getLimit() + " Расход: " + entry.getValue());
+                }
+            }
+        }
+    }
+
+    private static void gatheringStatWallet(Stat statistic, Wallet wallet) {
         Integer balance = 0;
         Integer generalIncome = 0;
         Integer generalExpense = 0;
         List<Operation> operations = wallet.getOperations();
-        Map<Category, Integer> summaryIncome = new HashMap<>();
-        Map<Category, Integer> summaryExpense = new HashMap<>();
+        Map<UUID, Integer> summaryIncome = new HashMap<>();
+        Map<UUID, Integer> summaryExpense = new HashMap<>();
         for (int i = 0; i < operations.size(); i++) {
             Operation op = operations.get(i);
             if (op.getType().equals(Type.INCOME)) {
                 balance += op.getSum();
                 generalIncome += op.getSum();
-                summaryIncome.merge(op.getCategory(), op.getSum(), Integer::sum);
+                summaryIncome.merge(op.getCategoryId(), op.getSum(), Integer::sum);
             } else {
                 balance -= op.getSum();
                 generalExpense += op.getSum();
-                summaryExpense.merge(op.getCategory(), op.getSum(), Integer::sum);
+                summaryExpense.merge(op.getCategoryId(), op.getSum(), Integer::sum);
             }
         }
-        System.out.println("Balance " + balance);
-        printMap(summaryIncome, generalIncome, Type.INCOME);
-        printMap(summaryExpense, generalExpense, Type.EXPENSE);
+        statistic.setBalance(balance);
+        statistic.setGeneralIncome(generalIncome);
+        statistic.setGeneralExpense(generalExpense);
+        statistic.setSummaryIncome(summaryIncome);
+        statistic.setSummaryExpense(summaryExpense);
     }
 
-    private static void printMap(Map<Category, Integer> summary, Integer general, Type type) {
+    private static void printMap(Map<UUID, Integer> summary, Integer general, Type type, Map<UUID, Category> categories) {
         System.out.println((type.equals(Type.INCOME) ? "Общий доход: " : "Общие расходы: ") + general);
         System.out.println(type.equals(Type.INCOME) ? "Доходы по категориям: " : "Бюджет по категориям: ");
-        for (Map.Entry<Category, Integer> entry : summary.entrySet()) {
+        for (Map.Entry<UUID, Integer> entry : summary.entrySet()) {
             if (entry.getKey() != null) {
-                System.out.print(entry.getKey().getName() + ": " + entry.getValue());
+                System.out.print(categories.get(entry.getKey()).getName() + ": " + entry.getValue());
                 if (type.equals(Type.EXPENSE)) {
-                    System.out.println(" Оставшийся бюджет: " + (entry.getKey().getLimit() - summary.get(entry.getKey())));
+                    System.out.println(" Оставшийся бюджет: " + (categories.get(entry.getKey()).getLimit() - summary.get(entry.getKey())));
                 } else {
                     System.out.println("");
                 }
@@ -220,6 +296,19 @@ public class Main {
             return null;
         }
         return categories.get(number - 1);
+    }
+
+    private static Category chooseCategoryToChange(BufferedReader reader, Wallet wallet) throws IOException {
+        List<Category> categories = wallet.getCategories();
+        for (int i = 0; i < categories.size(); i++) {
+            System.out.println(i + " - " + categories.get(i).getName());
+        }
+        int number = Integer.parseInt(reader.readLine());
+        if (number >= categories.size()) {
+            System.err.println("Вы ввели неправильный номер категории");
+            return null;
+        }
+        return categories.get(number);
     }
 
     private static Type chooseTypes(BufferedReader reader, Type[] types) throws IOException {

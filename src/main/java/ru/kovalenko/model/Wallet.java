@@ -1,24 +1,22 @@
 package ru.kovalenko.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Wallet {
     UUID uuid;
-    List<Category> categories = new ArrayList<>();
-    List<Operation> operations = new ArrayList<>();
+    Map<UUID, Category> categories = new HashMap();
+    Map<UUID, Operation> operations = new HashMap<>();
 
     public Wallet(UUID uuid) {
         this.uuid = uuid;
     }
 
     public void addCategory(Category category) {
-        categories.add(category);
+        categories.put(category.getUuid(), category);
     }
 
     public void addOperations(Operation operation) {
-        operations.add(operation);
+        operations.put(operation.getUuid(), operation);
     }
 
     public UUID getUuid() {
@@ -26,10 +24,14 @@ public class Wallet {
     }
 
     public List<Category> getCategories() {
+        return new ArrayList<>(categories.values());
+    }
+
+    public Map<UUID, Category> getMapCategories() {
         return categories;
     }
 
     public List<Operation> getOperations() {
-        return operations;
+        return new ArrayList<>(operations.values());
     }
 }

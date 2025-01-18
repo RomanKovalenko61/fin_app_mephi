@@ -5,7 +5,7 @@ import java.util.UUID;
 public class Operation {
     UUID uuid;
     Integer sum;
-    Category category;
+    UUID categoryId;
     String description;
 
     Type type;
@@ -17,7 +17,11 @@ public class Operation {
     }
 
     public void setCategory(Category category) {
-        this.category = category;
+        this.categoryId = category.getUuid();
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
 
     public Type getType() {
@@ -28,8 +32,8 @@ public class Operation {
         return sum;
     }
 
-    public Category getCategory() {
-        return category;
+    public UUID getCategoryId() {
+        return categoryId;
     }
 
     @Override
@@ -37,7 +41,7 @@ public class Operation {
         return "Operation{" +
                 "uuid=" + uuid +
                 ", sum=" + sum +
-                ", category=" + category +
+                ", category=" + categoryId +
                 ", description='" + description + '\'' +
                 ", type=" + type +
                 '}';

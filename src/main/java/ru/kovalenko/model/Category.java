@@ -18,6 +18,18 @@ public class Category {
         this.type = type;
     }
 
+    public void setLimit(Integer limit) {
+        this.limit = limit;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
     public String getName() {
         return name;
     }
