@@ -20,12 +20,24 @@ public class Operation {
         this.categoryId = category.getUuid();
     }
 
+    public void setNullCategory() {
+        this.categoryId = null;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
     public UUID getUuid() {
         return uuid;
     }
 
     public Type getType() {
         return type;
+    }
+
+    public void setSum(Integer sum) {
+        this.sum = sum;
     }
 
     public Integer getSum() {

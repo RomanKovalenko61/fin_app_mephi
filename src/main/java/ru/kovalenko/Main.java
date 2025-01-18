@@ -171,6 +171,28 @@ public class Main {
                             break;
                         case "operation":
                             System.out.println("update operation");
+                            System.out.println("Введите UUID операции");
+                            UUID idOperation = UUID.fromString(reader.readLine());
+                            if (!wallet.isOperation(idOperation)) {
+                                System.err.println("Не найдена операция с UUID " + idOperation);
+                            } else {
+                                Operation updateOp = wallet.getOperationByUUID(idOperation);
+                                System.out.println("Введите сумму операции");
+                                Integer sumOp = Integer.parseInt(reader.readLine());
+                                if (sumOp < 0) {
+                                    System.err.println("Ошибка ВВедено отрицательное число");
+                                    break;
+                                }
+                                Category updateCatOp = chooseCategory(reader, wallet, updateOp.getType());
+                                if (Objects.nonNull(updateCatOp)) {
+                                    updateOp.setCategory(updateCatOp);
+                                }
+                                updateOp.setSum(sumOp);
+                                wallet.updateOperation(updateOp);
+                            }
+                            break;
+                        default:
+                            System.out.println("Неверная команда");
                             break;
                     }
                     break;
@@ -182,9 +204,28 @@ public class Main {
                     switch (who) {
                         case "category":
                             System.out.println("delete category");
+                            System.out.println("Введите UUID категории");
+                            UUID idCategory = UUID.fromString(reader.readLine());
+                            if (!wallet.isCategory(idCategory)) {
+                                System.err.println("Не найдена категория с UUID " + idCategory);
+                            } else {
+                                List<Operation> opList = wallet.getOperationsByCategoryId(idCategory);
+                                opList.forEach(Operation::setNullCategory);
+                                wallet.deleteCategoryByUUID(idCategory);
+                            }
                             break;
                         case "operation":
                             System.out.println("delete operation");
+                            System.out.println("Введите UUID операции");
+                            UUID idOperation = UUID.fromString(reader.readLine());
+                            if (!wallet.isOperation(idOperation)) {
+                                System.err.println("Не найдена операция с UUID " + idOperation);
+                            } else {
+                                wallet.deleteOperationByUUID(idOperation);
+                            }
+                            break;
+                        default:
+                            System.out.println("Неверная команда");
                             break;
                     }
                     break;
