@@ -10,10 +10,7 @@ import ru.kovalenko.utils.GsonLoader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class Main {
 
@@ -82,8 +79,9 @@ public class Main {
         Wallet wallet = WALLETS_STORAGE.get(uuid);
 
         while (true) {
+            printStateWallet(wallet);
             System.out.println("Введите команду для работы");
-            System.out.println(" get | create category | create operation | list categories | list operations | | exit");
+            System.out.println("create category | create operation | list categories | list operations | exit");
             String params[] = reader.readLine().trim().toLowerCase().split(" ");
             if (params.length < 1 || params.length > 2) {
                 System.out.println("Неверная команда");
@@ -165,6 +163,45 @@ public class Main {
                 default:
                     System.out.println("Неверная команда");
                     break;
+            }
+        }
+    }
+
+    private static void printStateWallet(Wallet wallet) {
+        Integer balance = 0;
+        Integer generalIncome = 0;
+        Integer generalExpense = 0;
+        List<Operation> operations = wallet.getOperations();
+        Map<Category, Integer> summaryIncome = new HashMap<>();
+        Map<Category, Integer> summaryExpense = new HashMap<>();
+        for (int i = 0; i < operations.size(); i++) {
+            Operation op = operations.get(i);
+            if (op.getType().equals(Type.INCOME)) {
+                balance += op.getSum();
+                generalIncome += op.getSum();
+                summaryIncome.merge(op.getCategory(), op.getSum(), Integer::sum);
+            } else {
+                balance -= op.getSum();
+                generalExpense += op.getSum();
+                summaryExpense.merge(op.getCategory(), op.getSum(), Integer::sum);
+            }
+        }
+        System.out.println("Balance " + balance);
+        printMap(summaryIncome, generalIncome, Type.INCOME);
+        printMap(summaryExpense, generalExpense, Type.EXPENSE);
+    }
+
+    private static void printMap(Map<Category, Integer> summary, Integer general, Type type) {
+        System.out.println((type.equals(Type.INCOME) ? "Общий доход: " : "Общие расходы: ") + general);
+        System.out.println(type.equals(Type.INCOME) ? "Доходы по категориям: " : "Бюджет по категориям: ");
+        for (Map.Entry<Category, Integer> entry : summary.entrySet()) {
+            if (entry.getKey() != null) {
+                System.out.print(entry.getKey().getName() + ": " + entry.getValue());
+                if (type.equals(Type.EXPENSE)) {
+                    System.out.println(" Оставшийся бюджет: " + (entry.getKey().getLimit() - summary.get(entry.getKey())));
+                } else {
+                    System.out.println("");
+                }
             }
         }
     }

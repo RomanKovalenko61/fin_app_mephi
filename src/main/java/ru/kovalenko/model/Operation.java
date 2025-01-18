@@ -20,6 +20,18 @@ public class Operation {
         this.category = category;
     }
 
+    public Type getType() {
+        return type;
+    }
+
+    public Integer getSum() {
+        return sum;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
     @Override
     public String toString() {
         return "Operation{" +
