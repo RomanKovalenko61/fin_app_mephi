@@ -1,21 +1,33 @@
 package ru.kovalenko.model;
 
+import java.util.UUID;
+
 public class Operation {
+    UUID uuid;
     Integer sum;
     Category category;
     String description;
 
-    public Operation(Integer sum, Category category) {
+    Type type;
+
+    public Operation(Integer sum, Type type) {
+        uuid = UUID.randomUUID();
         this.sum = sum;
+        this.type = type;
+    }
+
+    public void setCategory(Category category) {
         this.category = category;
     }
 
     @Override
     public String toString() {
         return "Operation{" +
-                "sum=" + sum +
+                "uuid=" + uuid +
+                ", sum=" + sum +
                 ", category=" + category +
                 ", description='" + description + '\'' +
+                ", type=" + type +
                 '}';
     }
 }

@@ -1,13 +1,17 @@
 package ru.kovalenko.model;
 
-import java.math.BigInteger;
+import java.util.UUID;
 
 public class Category {
+
+    UUID uuid;
     Integer limit;
     String name;
+
     Type type;
 
     public Category(Integer limit, String name, Type type) {
+        uuid = UUID.randomUUID();
         this.limit = limit;
         this.name = name;
         this.type = type;
@@ -17,10 +21,19 @@ public class Category {
         return name;
     }
 
+    public Integer getLimit() {
+        return limit;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
         return "Category{" +
-                "limit=" + limit +
+                "uuid=" + uuid +
+                ", limit=" + limit +
                 ", name='" + name + '\'' +
                 ", type=" + type +
                 '}';

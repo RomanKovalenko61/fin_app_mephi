@@ -2,22 +2,19 @@ package ru.kovalenko.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import ru.kovalenko.model.Category;
-import ru.kovalenko.model.Operation;
 import ru.kovalenko.model.User;
+import ru.kovalenko.model.Wallet;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
 
 public class GsonLoader {
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new Gson().newBuilder().setPrettyPrinting().create();
 
     private static final File STORAGE_USERS = new File("config\\users.json");
 
-    private static final File STORAGE_CATEGORIES = new File("config\\categories.json");
-
-    private static final File STORAGE_OPERATIONS = new File("config\\operations.json");
+    private static final File STORAGE_WALLETS = new File("config\\wallets.json");
 
     public static void saveUsers(List<User> users) throws IOException {
         Type type = new TypeToken<List<User>>() {
@@ -34,34 +31,19 @@ public class GsonLoader {
         return reader(STORAGE_USERS, type);
     }
 
-    public static void saveCategories(Map<UUID, List<Category>> categories) throws IOException {
-        Type type = new TypeToken<Map<UUID, List<Category>>>() {
+    public static void saveWallets(Map<UUID, Wallet> wallets) throws IOException {
+        Type type = new TypeToken<Map<UUID, Wallet>>() {
         }.getType();
-        String json = GSON.toJson(categories, type);
+        String json = GSON.toJson(wallets, type);
 
-        writer(json, STORAGE_CATEGORIES);
+        writer(json, STORAGE_WALLETS);
     }
 
-    public static Map<UUID, List<Category>> loadCategories() throws IOException {
-        Type type = new TypeToken<Map<UUID, List<Category>>>() {
+    public static Map<UUID, Wallet> loadWallets() throws IOException {
+        Type type = new TypeToken<Map<UUID, Wallet>>() {
         }.getType();
 
-        return readerMap(STORAGE_CATEGORIES, type);
-    }
-
-    public static void saveOperations(Map<UUID, List<Operation>> operations) throws IOException {
-        Type type = new TypeToken<Map<UUID, List<Operation>>>() {
-        }.getType();
-        String json = GSON.toJson(operations, type);
-
-        writer(json, STORAGE_OPERATIONS);
-    }
-
-    public static Map<UUID, List<Operation>> loadOperations() throws IOException {
-        Type type = new TypeToken<Map<UUID, List<Operation>>>() {
-        }.getType();
-
-        return readerMap(STORAGE_OPERATIONS, type);
+        return readerMap(STORAGE_WALLETS, type);
     }
 
     private static List<User> reader(File file, Type type) throws IOException {

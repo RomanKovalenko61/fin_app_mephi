@@ -1,10 +1,10 @@
 package ru.kovalenko;
 
-import ru.kovalenko.model.Category;
-import ru.kovalenko.model.Operation;
-import ru.kovalenko.model.Type;
-import ru.kovalenko.model.User;
-import ru.kovalenko.storage.*;
+import ru.kovalenko.model.*;
+import ru.kovalenko.storage.ListUsersStorage;
+import ru.kovalenko.storage.MapStorageWallet;
+import ru.kovalenko.storage.StorageUser;
+import ru.kovalenko.storage.StorageWallet;
 import ru.kovalenko.utils.GsonLoader;
 
 import java.io.BufferedReader;
@@ -19,9 +19,7 @@ public class Main {
 
     private static final StorageUser USERS_STORAGE = new ListUsersStorage();
 
-    private static final StorageCategory CATEGORIES_STORAGE = new MapStorageCategory();
-
-    private static final StorageOperations OPERATIONS_STORAGE = new MapStorageOperations();
+    private static final StorageWallet WALLETS_STORAGE = new MapStorageWallet();
 
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -81,8 +79,7 @@ public class Main {
     }
 
     private static void workOperation(UUID uuid, BufferedReader reader) throws IOException {
-        List<Category> categories = getUserCategory(uuid);
-        List<Operation> operations = getUserOperation(uuid);
+        Wallet wallet = WALLETS_STORAGE.get(uuid);
 
         while (true) {
             System.out.println("Введите команду для работы");
@@ -103,25 +100,36 @@ public class Main {
                             System.out.println("create category");
                             System.out.println("Введите имя категории");
                             String catName = reader.readLine();
-                            System.out.println("Введите тип категории: income - доход expense - расход");
-                            Type catType = Type.valueOf(reader.readLine().toUpperCase());
-                            System.out.println("Введите лимит средств для категории");
-                            Integer limit = Integer.parseInt(reader.readLine());
-                            Category newCat = new Category(limit, catName, catType);
-                            categories.add(newCat);
-                            System.out.println("Категория успешно добавлена");
+                            System.out.println("Введите лимит для категории");
+                            Integer catLimit = Integer.parseInt(reader.readLine());
+                            System.out.println("Выберите тип категории");
+                            Type catType = chooseTypes(reader, Type.values());
+                            if (Objects.isNull(catType)) {
+                                System.err.println("Ошибка при создании операции. Попробуйте еще раз");
+                            } else {
+                                Category newCat = new Category(catLimit, catName, catType);
+                                wallet.addCategory(newCat);
+                                System.out.println("Категория успешно добавлена");
+                                System.out.println("Info: " + newCat);
+                            }
                             break;
                         case "operation":
                             System.out.println("create operation");
                             System.out.println("Введите сумму операции");
                             Integer sumOp = Integer.parseInt(reader.readLine());
-                            System.out.println("Выберите категорию. Введите соответствующую ей цифру");
-                            printCategories(categories);
-                            Integer catNumber = Integer.parseInt(reader.readLine());
-                            //TODO: default category
-                            Operation op = new Operation(sumOp, chooseCategory(catNumber, categories));
-                            operations.add(op);
-                            System.out.println("Операция добавлена");
+                            System.out.println("Выберите тип операции");
+                            Type typeOp = chooseTypes(reader, Type.values());
+                            if (Objects.isNull(typeOp)) {
+                                System.err.println("Ошибка при создании операции. Попробуйте еще раз");
+                            } else {
+                                Operation newOp = new Operation(sumOp, typeOp);
+                                System.out.println("Выберите категорию для операции");
+                                Category catOp = chooseCategory(reader, wallet, typeOp);
+                                newOp.setCategory(catOp);
+                                wallet.addOperations(newOp);
+                                System.out.println("Операция добавлена");
+                                System.out.println("Info: " + newOp);
+                            }
                             break;
                         default:
                             System.err.println("wrong command");
@@ -136,10 +144,12 @@ public class Main {
                     switch (param) {
                         case "categories":
                             System.out.println("list categories");
+                            List<Category> categories = wallet.getCategories();
                             categories.forEach(System.out::println);
                             break;
                         case "operations":
                             System.out.println("list operations");
+                            List<Operation> operations = wallet.getOperations();
                             operations.forEach(System.out::println);
                             break;
                         default:
@@ -148,12 +158,9 @@ public class Main {
                     }
                     break;
                 case "exit":
-                    Map<UUID, List<Category>> categoriesMap = CATEGORIES_STORAGE.getStorage();
-                    categoriesMap.put(uuid, categories);
-                    Map<UUID, List<Operation>> operationsMap = OPERATIONS_STORAGE.getStorage();
-                    operationsMap.put(uuid, operations);
-                    GsonLoader.saveCategories(categoriesMap);
-                    GsonLoader.saveOperations(operationsMap);
+                    WALLETS_STORAGE.save(wallet);
+                    Map<UUID, Wallet> walletsMap = WALLETS_STORAGE.getStorage();
+                    GsonLoader.saveWallets(walletsMap);
                     return;
                 default:
                     System.out.println("Неверная команда");
@@ -162,26 +169,31 @@ public class Main {
         }
     }
 
-    private static Category chooseCategory(Integer catNumber, List<Category> categories) {
+    private static Category chooseCategory(BufferedReader reader, Wallet wallet, Type type) throws IOException {
+        List<Category> categories = wallet.getCategories().stream().filter(c -> c.getType().equals(type)).toList();
+        System.out.println("0 - Без категории");
         for (int i = 0; i < categories.size(); i++) {
-            if (catNumber - 1 == i) {
-                return categories.get(i);
-            }
+            System.out.println((i + 1) + " - " + categories.get(i).getName());
         }
-        return null;
-    }
-
-    private static void printCategories(List<Category> list) {
-        for (int i = 0; i < list.size(); i++) {
-            System.out.println((i + 1) + " " + list.get(i).getName() + " ");
+        Integer number = Integer.parseInt(reader.readLine());
+        if (number > categories.size()) {
+            System.err.println("Вы ввели неправильный номер. Значении категории не будет присвоено");
+            return null;
+        } else if (number - 1 == -1) {
+            return null;
         }
+        return categories.get(number - 1);
     }
 
-    private static List<Operation> getUserOperation(UUID uuid) {
-        return OPERATIONS_STORAGE.getListById(uuid);
-    }
-
-    private static List<Category> getUserCategory(UUID uuid) {
-        return CATEGORIES_STORAGE.getListById(uuid);
+    private static Type chooseTypes(BufferedReader reader, Type[] types) throws IOException {
+        for (int i = 0; i < types.length; i++) {
+            System.out.println(i + " - " + types[i].getDescription());
+        }
+        int number = Integer.parseInt(reader.readLine());
+        if (number >= types.length) {
+            System.err.println("Вы ввели неправильный номер");
+            return null;
+        }
+        return Type.values()[number];
     }
 }
