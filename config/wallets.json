@@ -1,0 +1,111 @@
+{
+  "31260a1b-021c-4aa7-b897-0787669e0eb2": {
+    "uuid": "31260a1b-021c-4aa7-b897-0787669e0eb2",
+    "categories": {
+      "aa5ad1f5-1d57-4d93-8aed-220ada988b75": {
+        "uuid": "aa5ad1f5-1d57-4d93-8aed-220ada988b75",
+        "limit": 4000,
+        "name": "Еда",
+        "type": "EXPENSE"
+      },
+      "1305c8b0-4aca-4d88-8f67-1b05a1b0a3e3": {
+        "uuid": "1305c8b0-4aca-4d88-8f67-1b05a1b0a3e3",
+        "limit": 3000,
+        "name": "Развлечения",
+        "type": "EXPENSE"
+      },
+      "b8f1faca-d732-4777-abe3-8450b5050eb4": {
+        "uuid": "b8f1faca-d732-4777-abe3-8450b5050eb4",
+        "limit": 2500,
+        "name": "Коммунальные услуги",
+        "type": "EXPENSE"
+      },
+      "2b73716e-4348-4554-8cd6-105730e51341": {
+        "uuid": "2b73716e-4348-4554-8cd6-105730e51341",
+        "limit": 0,
+        "name": "Зарплата",
+        "type": "INCOME"
+      }
+    },
+    "operations": {
+      "db4e0f54-ad9f-431f-bb7f-51d59afdf6db": {
+        "uuid": "db4e0f54-ad9f-431f-bb7f-51d59afdf6db",
+        "sum": 20000,
+        "categoryId": "2b73716e-4348-4554-8cd6-105730e51341",
+        "type": "INCOME"
+      },
+      "869a7ccb-c827-4d6f-883c-47b0db6378a9": {
+        "uuid": "869a7ccb-c827-4d6f-883c-47b0db6378a9",
+        "sum": 40000,
+        "categoryId": "2b73716e-4348-4554-8cd6-105730e51341",
+        "type": "INCOME"
+      },
+      "078cd979-17ee-474b-b876-e9298f4c955a": {
+        "uuid": "078cd979-17ee-474b-b876-e9298f4c955a",
+        "sum": 3000,
+        "type": "INCOME"
+      },
+      "30f2da3f-f646-4013-b0a6-04c9b4e1853f": {
+        "uuid": "30f2da3f-f646-4013-b0a6-04c9b4e1853f",
+        "sum": 300,
+        "categoryId": "aa5ad1f5-1d57-4d93-8aed-220ada988b75",
+        "type": "EXPENSE"
+      },
+      "44fbb947-586f-4d99-a265-e3b19919692e": {
+        "uuid": "44fbb947-586f-4d99-a265-e3b19919692e",
+        "sum": 500,
+        "categoryId": "aa5ad1f5-1d57-4d93-8aed-220ada988b75",
+        "type": "EXPENSE"
+      },
+      "13b82b44-7a59-49be-af9a-c6ad5860d448": {
+        "uuid": "13b82b44-7a59-49be-af9a-c6ad5860d448",
+        "sum": 3000,
+        "categoryId": "1305c8b0-4aca-4d88-8f67-1b05a1b0a3e3",
+        "type": "EXPENSE"
+      },
+      "cf3d94c6-675d-4c98-b3f6-f3ca45870f21": {
+        "uuid": "cf3d94c6-675d-4c98-b3f6-f3ca45870f21",
+        "sum": 3000,
+        "categoryId": "b8f1faca-d732-4777-abe3-8450b5050eb4",
+        "type": "EXPENSE"
+      }
+    }
+  },
+  "0c1468d6-cc04-4409-a509-c503152feccf": {
+    "uuid": "0c1468d6-cc04-4409-a509-c503152feccf",
+    "categories": {
+      "a9f24098-88e5-47cd-a3ee-f8a5fedd96c4": {
+        "uuid": "a9f24098-88e5-47cd-a3ee-f8a5fedd96c4",
+        "limit": 0,
+        "name": "Зарплата",
+        "type": "INCOME"
+      },
+      "9288deee-e842-4b3b-9e5c-dfabccd2ce5c": {
+        "uuid": "9288deee-e842-4b3b-9e5c-dfabccd2ce5c",
+        "limit": 10000,
+        "name": "Обязательные платежи",
+        "type": "EXPENSE"
+      },
+      "d09d64da-4cb1-4af8-a4a3-38294ebd1aa3": {
+        "uuid": "d09d64da-4cb1-4af8-a4a3-38294ebd1aa3",
+        "limit": 5000,
+        "name": "Еда",
+        "type": "EXPENSE"
+      }
+    },
+    "operations": {
+      "beec7494-ef2d-416e-9235-24ad0fdf4179": {
+        "uuid": "beec7494-ef2d-416e-9235-24ad0fdf4179",
+        "sum": 50000,
+        "categoryId": "a9f24098-88e5-47cd-a3ee-f8a5fedd96c4",
+        "type": "INCOME"
+      },
+      "1f4bef12-a163-4532-849d-13e5832dbd66": {
+        "uuid": "1f4bef12-a163-4532-849d-13e5832dbd66",
+        "sum": 12000,
+        "categoryId": "d09d64da-4cb1-4af8-a4a3-38294ebd1aa3",
+        "type": "EXPENSE"
+      }
+    }
+  }
+}
