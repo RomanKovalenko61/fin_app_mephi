@@ -80,7 +80,13 @@ public class Main {
         Stat statistic = new Stat();
         while (true) {
             gatheringStatWallet(statistic, wallet);
-            System.out.println("Ваш баланс: " + statistic.getBalance());
+            int balance = statistic.getBalance();
+            if (balance >= 0) {
+                System.out.println("Ваш баланс: " + balance);
+            } else {
+                System.err.println("Ваш баланс ниже нуля");
+                System.err.println("Ваш баланс: " + balance);
+            }
             checkExpenseByCategory(statistic, wallet.getMapCategories());
             System.out.println("Введите команду для работы");
             System.out.println("""
